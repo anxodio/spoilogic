@@ -1,1 +1,1 @@
-# spoilerlogic
+# spoilogic

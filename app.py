@@ -1,16 +1,23 @@
+import os
 from datetime import datetime
 from dataclasses import dataclass
 from typing import Set, List
 
-from chalice import Chalice
+from chalice import Chalice, Cron
+from dotenv import load_dotenv
 import requests
+from requests_oauthlib import OAuth1
 
-URL = "https://paraulogic.rodamots.cat/?solucions="
+
+SOLUTION_URL = "https://paraulogic.rodamots.cat/?solucions="
+TWITTER_URL = "https://api.twitter.com/2/tweets"
 PUBLIC_TOKEN = "Y29udHJhc2VueWE="
-BIG_WORD_MIN_LENGTH = 5
+BIG_WORD_MIN_LENGTH = 6
 START_HOUR = 9
 
-app = Chalice(app_name="spoilerlogic")
+
+load_dotenv()
+app = Chalice(app_name="spoilogic")
 
 
 @dataclass
@@ -31,7 +38,19 @@ class Word:
 @app.route("/")
 def index():
     word = get_current_word()
-    return {"hello": word.word}
+    return {"Current word": word.word}
+
+
+@app.route("/tweet")
+def tweet_test():
+    word = get_current_word()
+    make_tweet(word)
+
+
+@app.schedule(Cron('*/20', '9-23', '*', '*', '?', '*'))
+def scheduled_tweet(event):
+    word = get_current_word()
+    make_tweet(word)
 
 
 def get_current_word() -> Word:
@@ -43,7 +62,7 @@ def get_current_word() -> Word:
 
 def download_solutions() -> dict:
     return requests.get(
-        URL + "{:%Y-%m-%d}".format(datetime.now()),
+        SOLUTION_URL + "{:%Y-%m-%d}".format(datetime.now()),
         headers={"Authorization": "Basic " + PUBLIC_TOKEN},
     ).json()
 
@@ -60,5 +79,25 @@ def get_nth_big_word(words: List[str], position: int) -> str:
     return big_words[position]
 
 
+def make_tweet(word: Word) -> None:
+    text = word.word.upper()
+    if word.tutti:
+        text += "\n\n 🆃🆄🆃🆃🅸"
+
+    oauth = OAuth1(
+        os.getenv("TWITTER_API_KEY"),
+        client_secret=os.getenv("TWITTER_API_SECRET"),
+        resource_owner_key=os.getenv("TWITTER_OAUTH_ACCESS_TOKEN"),
+        resource_owner_secret=os.getenv("TWITTER_OAUTH_ACCESS_TOKEN_SECRET"),
+    )
+    response = requests.post(
+        TWITTER_URL,
+        auth=oauth,
+        json={"text": text},
+    )
+    print(response.text)
+
+
 if __name__ == "__main__":
+    # tweet_test()
     print(get_current_word().word)
