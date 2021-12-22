@@ -68,10 +68,10 @@ def download_solutions() -> dict:
 
 
 def get_position_by_datetime() -> int:
-    # Every half and hour position increments by one
+    # Every twenty minutes position increments by one
     now = datetime.now()
     start_datetime = datetime(now.year, now.month, now.day, START_HOUR, 0, 0)
-    return (now - start_datetime).seconds // 1800
+    return (now - start_datetime).seconds // 1200
 
 
 def get_nth_big_word(words: List[str], position: int) -> str:

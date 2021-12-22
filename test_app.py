@@ -33,13 +33,13 @@ def test_get_position_by_datetime_0():
 
 
 @freeze_time("2021-12-21T10:32:54")
-def test_get_position_by_datetime_3():
-    assert get_position_by_datetime() == 3
+def test_get_position_by_datetime_4():
+    assert get_position_by_datetime() == 4
 
 
 @freeze_time("2021-12-21T11:59:11")
-def test_get_position_by_datetime_5():
-    assert get_position_by_datetime() == 5
+def test_get_position_by_datetime_8():
+    assert get_position_by_datetime() == 8
 
 
 def test_download_solutions():
