@@ -24,15 +24,15 @@ app = Chalice(app_name="spoilogic")
 class Word:
     word: str
     score: int
-    tutti: bool
+    is_tuti: bool
 
     @staticmethod
     def build(word: str, today_letters: Set[str]) -> "Word":
         score = len(word) if len(word) > 4 else len(word) - 2
-        tutti = today_letters.issubset(set(word))
-        if tutti:
+        is_tuti = today_letters.issubset(set(word))
+        if is_tuti:
             score += 10
-        return Word(word, score, tutti)
+        return Word(word, score, is_tuti)
 
 
 @app.route("/")
@@ -81,8 +81,8 @@ def get_nth_big_word(words: List[str], position: int) -> str:
 
 def make_tweet(word: Word) -> None:
     text = word.word.upper()
-    if word.tutti:
-        text += "\n\n 🆃🆄🆃🆃🅸"
+    if word.is_tuti:
+        text += "\n\n 🆃🆄🆃🅸"
 
     oauth = OAuth1(
         os.getenv("TWITTER_API_KEY"),
