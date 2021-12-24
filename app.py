@@ -47,7 +47,7 @@ def tweet_test():
     make_tweet(word)
 
 
-@app.schedule(Cron('*/20', '9-23', '*', '*', '?', '*'))
+@app.schedule(Cron("*/20", "9-23", "*", "*", "?", "*"))
 def scheduled_tweet(event):
     word = get_current_word()
     make_tweet(word)
