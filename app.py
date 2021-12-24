@@ -1,5 +1,6 @@
 import os
-from datetime import datetime
+import random
+from datetime import datetime, timedelta
 from dataclasses import dataclass
 from typing import Set, List
 
@@ -42,15 +43,16 @@ def index():
 
 
 @app.route("/tweet")
-def tweet_test():
+def tweet():
     word = get_current_word()
-    make_tweet(word)
+    created_id = make_tweet(word)
+    paraulogic_tweets = search_last_paraulogic_tweets()
+    reply_to_paraulogic_tweets(paraulogic_tweets, created_id)
 
 
 @app.schedule(Cron("*/20", "9-23", "*", "*", "?", "*"))
 def scheduled_tweet(event):
-    word = get_current_word()
-    make_tweet(word)
+    tweet()
 
 
 def get_current_word() -> Word:
@@ -79,25 +81,61 @@ def get_nth_big_word(words: List[str], position: int) -> str:
     return big_words[position]
 
 
-def make_tweet(word: Word) -> None:
-    text = word.word.upper()
-    if word.is_tuti:
-        text += "\n\n 🆃🆄🆃🅸"
-
-    oauth = OAuth1(
+def get_tweeter_auth() -> OAuth1:
+    return OAuth1(
         os.getenv("TWITTER_API_KEY"),
         client_secret=os.getenv("TWITTER_API_SECRET"),
         resource_owner_key=os.getenv("TWITTER_OAUTH_ACCESS_TOKEN"),
         resource_owner_secret=os.getenv("TWITTER_OAUTH_ACCESS_TOKEN_SECRET"),
     )
+
+
+def make_tweet(word: Word) -> int:
+    text = word.word.upper()
+    if word.is_tuti:
+        text += "\n\n 🆃🆄🆃🅸"
+
+    auth = get_tweeter_auth()
     response = requests.post(
         TWITTER_URL,
-        auth=oauth,
+        auth=auth,
         json={"text": text},
     )
-    print(response.text)
+    return response.json()["data"]["id"]
+
+
+def search_last_paraulogic_tweets() -> List[dict]:
+    auth = get_tweeter_auth()
+    twenty_minutes_ago = datetime.now() - timedelta(minutes=20)
+    response = requests.get(
+        "https://api.twitter.com/2/tweets/search/recent",
+        auth=auth,
+        params={
+            "query": "paraulogic",
+            "start_time": twenty_minutes_ago.isoformat(timespec="seconds") + "Z",
+        },
+    )
+    return response.json()["data"]
+
+
+def reply_to_paraulogic_tweets(tweet_list: List[dict], created_id: int) -> None:
+    emoji_replies = "😅😇🙃🥰😘😛😝😜🤪😎🤩😏🥺🤯😳😱😨😰😥🤗🤔🤭🤫😶😬🙄😯😵🤐🥴😈👻🤖🙀👋🖖🤟🤘🤙👆✊🙌💪"
+    random_emojis = "".join(random.sample(emoji_replies, len(emoji_replies)))
+    auth = get_tweeter_auth()
+    for i, tweet in enumerate(tweet_list):
+        response = requests.post(
+            TWITTER_URL,
+            auth=auth,
+            json={
+                "text": random_emojis[i],
+                "reply": {"in_reply_to_tweet_id": tweet["id"]},
+                "quote_tweet_id": created_id,
+            },
+        )
+        print(response.text)
 
 
 if __name__ == "__main__":
-    # tweet_test()
+    # tweet()
+    # print(search_last_paraulogic_tweets())
     print(get_current_word().word)
