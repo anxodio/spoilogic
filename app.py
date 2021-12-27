@@ -111,7 +111,7 @@ def search_last_paraulogic_tweets() -> List[dict]:
         "https://api.twitter.com/2/tweets/search/recent",
         auth=auth,
         params={
-            "query": "paraulogic -is:retweet",
+            "query": "paraulogic -is:retweet -(@paraulogic is:reply)",
             "start_time": twenty_minutes_ago.isoformat(timespec="seconds") + "Z",
         },
     )
