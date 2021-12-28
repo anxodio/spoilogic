@@ -1,6 +1,12 @@
 import json
 from freezegun import freeze_time
-from app import Word, get_nth_big_word, get_position_by_datetime, download_solutions
+from app import (
+    Word,
+    get_nth_big_word,
+    get_position_by_datetime,
+    download_solutions,
+    get_diec_definition_html,
+)
 
 
 def get_example_json():
@@ -8,18 +14,18 @@ def get_example_json():
 
 
 def test_build_word():
-    assert Word.build("des", {"d", "e", "g", "a", "v", "l", "s"}) == Word(
-        "des", 1, False
+    assert Word.build("des", "des", {"d", "e", "g", "a", "v", "l", "s"}) == Word(
+        "des", "des", 1, False
     )
-    assert Word.build("dese", {"d", "e", "g", "a", "v", "l", "s"}) == Word(
-        "dese", 2, False
+    assert Word.build("dese", "dese", {"d", "e", "g", "a", "v", "l", "s"}) == Word(
+        "dese", "dese", 2, False
     )
-    assert Word.build("desgel", {"d", "e", "g", "a", "v", "l", "s"}) == Word(
-        "desgel", 6, False
+    assert Word.build("desgel", "desgel", {"d", "e", "g", "a", "v", "l", "s"}) == Word(
+        "desgel", "desgel", 6, False
     )
-    assert Word.build("desgavell", {"d", "e", "g", "a", "v", "l", "s"}) == Word(
-        "desgavell", 19, True
-    )
+    assert Word.build(
+        "desgavell", "desgavell", {"d", "e", "g", "a", "v", "l", "s"}
+    ) == Word("desgavell", "desgavell", 19, True)
 
 
 def test_get_nth_big_word():
@@ -46,3 +52,8 @@ def test_download_solutions():
     raw_response = download_solutions()
     assert "lletres" in raw_response
     assert "paraules" in raw_response
+
+
+def test_get_diec_definition_html():
+    response = get_diec_definition_html(Word.build("angel", "àngel", set()))
+    assert "div" in response
