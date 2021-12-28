@@ -119,16 +119,21 @@ def get_diec_definition_html(word: Word) -> str:
     return (
         requests.get(
             DIEC_URL + definition_word,
-            headers={"Authorization": "Basic " + PUBLIC_TOKEN, "User-Agent": "Mozilla/5.0"},
+            headers={
+                "Authorization": "Basic " + PUBLIC_TOKEN,
+                "User-Agent": "Mozilla/5.0",
+            },
         ).json()["d"]
         + DIEC_COPYRIGHT
     )
 
 
 def upload_definition_to_image(definition_html: str) -> int:
-    imgkit_config = imgkit.config(wkhtmltoimage="./vendor/wkhtmltoimage")
+    config = imgkit.config()
+    if os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+        config = imgkit.config(wkhtmltoimage="./bin/wkhtmltoimage")
     binary_img = imgkit.from_string(
-        definition_html, False, config=imgkit_config, options={"width": "500"}
+        definition_html, False, config=config, options={"width": "500"}
     )
 
     auth = get_tweeter_auth()
