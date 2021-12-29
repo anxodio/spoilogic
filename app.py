@@ -71,7 +71,7 @@ def get_current_word() -> Word:
 def download_solutions() -> dict:
     return requests.get(
         SOLUTION_URL + "{:%Y-%m-%d}".format(datetime.now()),
-        headers={"Authorization": "Basic " + PUBLIC_TOKEN},
+        headers={"Authorization": "Basic " + PUBLIC_TOKEN, "User-Agent": "Mozilla/5.0"},
     ).json()
 
 
