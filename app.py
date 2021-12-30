@@ -54,9 +54,20 @@ def tweet():
     reply_to_paraulogic_tweets(paraulogic_tweets, created_id)
 
 
+@app.route("/solutions")
+def tweet_all_solution():
+    solutions = download_solutions()["paraules"].keys()
+    tweet_solution_image(solutions)
+
+
 @app.schedule(Cron("*/20", "9-23", "*", "*", "?", "*"))
 def scheduled_tweet(event):
     tweet()
+
+
+@app.schedule(Cron("30", "23", "*", "*", "?", "*"))
+def scheduled_tweet(event):
+    tweet_all_solution()
 
 
 def get_current_word() -> Word:
@@ -174,6 +185,19 @@ def reply_to_paraulogic_tweets(tweet_list: List[dict], created_id: int) -> None:
             },
         )
         print(response.text)
+
+
+def tweet_solution_image(tweet_list: List[str]):
+    media_id = upload_string_to_image(",".join(tweet_list))
+    text = "Totes les paraules d'avui!"
+
+    auth = get_tweeter_auth()
+    response = requests.post(
+        TWITTER_URL,
+        auth=auth,
+        json={"text": text, "media": {"media_ids": [str(media_id)]}},
+    )
+    return response.json()["data"]["id"]
 
 
 if __name__ == "__main__":
