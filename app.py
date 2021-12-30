@@ -102,7 +102,7 @@ def make_tweet(word: Word) -> int:
         text += "\n\n 🆃🆄🆃🅸"
 
     definition_html = get_diec_definition_html(word)
-    media_id = upload_definition_to_image(definition_html)
+    media_id = upload_string_to_image(definition_html)
 
     auth = get_tweeter_auth()
     response = requests.post(
@@ -128,12 +128,12 @@ def get_diec_definition_html(word: Word) -> str:
     )
 
 
-def upload_definition_to_image(definition_html: str) -> int:
+def upload_string_to_image(string: str) -> int:
     config = imgkit.config()
     if os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
         config = imgkit.config(wkhtmltoimage="./bin/wkhtmltoimage")
     binary_img = imgkit.from_string(
-        definition_html, False, config=config, options={"width": "500"}
+        string, False, config=config, options={"width": "500"}
     )
 
     auth = get_tweeter_auth()
