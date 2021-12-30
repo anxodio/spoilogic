@@ -55,19 +55,19 @@ def tweet():
 
 
 @app.route("/solutions")
-def tweet_all_solution():
+def tweet_all_solutions():
     solutions = download_solutions()["paraules"].keys()
     tweet_solution_image(solutions)
 
 
-@app.schedule(Cron("*/20", "9-23", "*", "*", "?", "*"))
+@app.schedule(Cron("*/20", "8-21", "*", "*", "?", "*"))
 def scheduled_tweet(event):
     tweet()
 
 
-@app.schedule(Cron("30", "23", "*", "*", "?", "*"))
-def scheduled_tweet(event):
-    tweet_all_solution()
+@app.schedule(Cron("0", "22", "*", "*", "?", "*"))
+def scheduled_solutions(event):
+    tweet_all_solutions()
 
 
 def get_current_word() -> Word:
@@ -187,8 +187,8 @@ def reply_to_paraulogic_tweets(tweet_list: List[dict], created_id: int) -> None:
         print(response.text)
 
 
-def tweet_solution_image(tweet_list: List[str]):
-    media_id = upload_string_to_image(",".join(tweet_list))
+def tweet_solution_image(words: List[str]) -> int:
+    media_id = upload_string_to_image(", ".join(words).upper())
     text = "Totes les paraules d'avui!"
 
     auth = get_tweeter_auth()
@@ -202,5 +202,6 @@ def tweet_solution_image(tweet_list: List[str]):
 
 if __name__ == "__main__":
     # tweet()
-    print(search_last_paraulogic_tweets())
-    # print(get_current_word().word)
+    # tweet_all_solutions()
+    # print(search_last_paraulogic_tweets())
+    print(get_current_word().word)
