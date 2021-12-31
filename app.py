@@ -54,9 +54,20 @@ def tweet():
     reply_to_paraulogic_tweets(paraulogic_tweets, created_id)
 
 
-@app.schedule(Cron("*/20", "9-23", "*", "*", "?", "*"))
+@app.route("/solutions")
+def tweet_all_solutions():
+    solutions = download_solutions()["paraules"].keys()
+    tweet_solution_image(solutions)
+
+
+@app.schedule(Cron("*/20", "8-21", "*", "*", "?", "*"))
 def scheduled_tweet(event):
     tweet()
+
+
+@app.schedule(Cron("0", "22", "*", "*", "?", "*"))
+def scheduled_solutions(event):
+    tweet_all_solutions()
 
 
 def get_current_word() -> Word:
@@ -102,7 +113,7 @@ def make_tweet(word: Word) -> int:
         text += "\n\n 🆃🆄🆃🅸"
 
     definition_html = get_diec_definition_html(word)
-    media_id = upload_definition_to_image(definition_html)
+    media_id = upload_string_to_image(definition_html)
 
     auth = get_tweeter_auth()
     response = requests.post(
@@ -128,12 +139,12 @@ def get_diec_definition_html(word: Word) -> str:
     )
 
 
-def upload_definition_to_image(definition_html: str) -> int:
+def upload_string_to_image(string: str) -> int:
     config = imgkit.config()
     if os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
         config = imgkit.config(wkhtmltoimage="./bin/wkhtmltoimage")
     binary_img = imgkit.from_string(
-        definition_html, False, config=config, options={"width": "500"}
+        string, False, config=config, options={"width": "500"}
     )
 
     auth = get_tweeter_auth()
@@ -176,7 +187,21 @@ def reply_to_paraulogic_tweets(tweet_list: List[dict], created_id: int) -> None:
         print(response.text)
 
 
+def tweet_solution_image(words: List[str]) -> int:
+    media_id = upload_string_to_image(", ".join(words).upper())
+    text = "Totes les paraules d'avui!"
+
+    auth = get_tweeter_auth()
+    response = requests.post(
+        TWITTER_URL,
+        auth=auth,
+        json={"text": text, "media": {"media_ids": [str(media_id)]}},
+    )
+    return response.json()["data"]["id"]
+
+
 if __name__ == "__main__":
     # tweet()
-    print(search_last_paraulogic_tweets())
-    # print(get_current_word().word)
+    # tweet_all_solutions()
+    # print(search_last_paraulogic_tweets())
+    print(get_current_word().word)
