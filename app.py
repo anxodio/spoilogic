@@ -11,11 +11,10 @@ from requests_oauthlib import OAuth1
 import imgkit
 
 
-SOLUTION_URL = "https://paraulogic.rodamots.cat/?solucions="
-DIEC_URL = "https://paraulogic.rodamots.cat/?diec="
+SOLUTION_URL = "https://vilaweb.cat/paraulogic/?solucions="
+DIEC_URL = "https://vilaweb.cat/paraulogic/?diec="
 TWITTER_URL = "https://api.twitter.com/2/tweets"
 DIEC_COPYRIGHT = "<br /><br /><span>© Institut d'Estudis Catalans</span>"
-PUBLIC_TOKEN = "Y29udHJhc2VueWE="
 BIG_WORD_MIN_LENGTH = 6
 START_HOUR = 9
 
@@ -50,8 +49,10 @@ def index():
 def tweet():
     word = get_current_word()
     created_id = make_tweet(word)
-    paraulogic_tweets = search_last_paraulogic_tweets()
-    reply_to_paraulogic_tweets(paraulogic_tweets, created_id)
+    print(created_id)
+    # By the moment, we avoid spamming :D
+    # paraulogic_tweets = search_last_paraulogic_tweets()
+    # reply_to_paraulogic_tweets(paraulogic_tweets, created_id)
 
 
 @app.route("/solutions")
@@ -82,7 +83,7 @@ def get_current_word() -> Word:
 def download_solutions() -> dict:
     return requests.get(
         SOLUTION_URL + "{:%Y-%m-%d}".format(datetime.now()),
-        headers={"Authorization": "Basic " + PUBLIC_TOKEN, "User-Agent": "Mozilla/5.0"},
+        headers={"User-Agent": "Mozilla/5.0"},
     ).json()
 
 
@@ -131,7 +132,6 @@ def get_diec_definition_html(word: Word) -> str:
         requests.get(
             DIEC_URL + definition_word,
             headers={
-                "Authorization": "Basic " + PUBLIC_TOKEN,
                 "User-Agent": "Mozilla/5.0",
             },
         ).json()["d"]
