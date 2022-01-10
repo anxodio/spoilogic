@@ -71,6 +71,11 @@ def scheduled_solutions(event):
     tweet_all_solutions()
 
 
+@app.schedule(Cron("30", "7", "*", "*", "?", "*"))
+def scheduled_morning_statistics(event):
+    tweet_morning_statistics()
+
+
 def get_current_word() -> Word:
     raw_solutions = download_solutions()
     actual_position = get_position_by_datetime()
@@ -87,6 +92,14 @@ def download_solutions() -> dict:
     ).json()
 
 
+def build_words_from_raw_response(raw_response: dict) -> List[Word]:
+    today_letters = set(raw_response["lletres"])
+    return [
+        Word.build(key, words, today_letters)
+        for key, words in raw_response["paraules"].items()
+    ]
+
+
 def get_position_by_datetime() -> int:
     # Every twenty minutes position increments by one
     now = datetime.now()
@@ -97,6 +110,10 @@ def get_position_by_datetime() -> int:
 def get_nth_big_word(words: List[str], position: int) -> str:
     big_words = [word for word in words if len(word) >= BIG_WORD_MIN_LENGTH]
     return big_words[position]
+
+
+def get_number_of_tutis(words: List[Word]) -> int:
+    return sum(1 for word in words if word.is_tuti)
 
 
 def get_twitter_auth() -> OAuth1:
@@ -196,6 +213,27 @@ def tweet_solution_image(words: List[str]) -> int:
         TWITTER_URL,
         auth=auth,
         json={"text": text, "media": {"media_ids": [str(media_id)]}},
+    )
+    return response.json()["data"]["id"]
+
+
+def tweet_morning_statistics() -> int:
+    raw_solutions = download_solutions()
+    words = build_words_from_raw_response(raw_solutions)
+    total_tutis = get_number_of_tutis(words)
+    tutis_text = "només un tuti" if len(total_tutis) == 1 else f"{total_tutis} tutis"
+
+    text = (
+        "Bon dia 👋\n\n"
+        f"Avui hi ha un total de {len(words)} paraules per trobar i {tutis_text}, molta sort!\n\n"
+        "En mitja horeta comencem amb els spoilers 😉"
+    )
+
+    auth = get_twitter_auth()
+    response = requests.post(
+        TWITTER_URL,
+        auth=auth,
+        json={"text": text},
     )
     return response.json()["data"]["id"]
 

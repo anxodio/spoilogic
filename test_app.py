@@ -6,6 +6,8 @@ from app import (
     get_position_by_datetime,
     download_solutions,
     get_diec_definition_html,
+    build_words_from_raw_response,
+    get_number_of_tutis,
 )
 
 
@@ -57,3 +59,17 @@ def test_download_solutions():
 def test_get_diec_definition_html():
     response = get_diec_definition_html(Word.build("angel", "àngel", set()))
     assert "div" in response
+
+
+def test_build_words_from_raw_response():
+    raw_response = get_example_json()
+    words = build_words_from_raw_response(raw_response)
+    assert len(words) == 73
+    assert isinstance(words[0], Word)
+
+
+def test_get_number_of_tutis():
+    raw_response = get_example_json()
+    words = build_words_from_raw_response(raw_response)
+    total_tutis = get_number_of_tutis(words)
+    assert total_tutis == 1

@@ -27,6 +27,16 @@
       "rule_name": "spoilogic-dev-scheduled_solutions-event"
     },
     {
+      "name": "scheduled_morning_statistics",
+      "resource_type": "lambda_function",
+      "lambda_arn": "arn:aws:lambda:eu-west-1:194767371995:function:spoilogic-dev-scheduled_morning_statistics"
+    },
+    {
+      "name": "scheduled_morning_statistics-event",
+      "resource_type": "cloudwatch_event",
+      "rule_name": "spoilogic-dev-scheduled_morning_statistics-event"
+    },
+    {
       "name": "api_handler",
       "resource_type": "lambda_function",
       "lambda_arn": "arn:aws:lambda:eu-west-1:194767371995:function:spoilogic-dev"
