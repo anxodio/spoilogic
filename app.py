@@ -99,7 +99,7 @@ def get_nth_big_word(words: List[str], position: int) -> str:
     return big_words[position]
 
 
-def get_tweeter_auth() -> OAuth1:
+def get_twitter_auth() -> OAuth1:
     return OAuth1(
         os.getenv("TWITTER_API_KEY"),
         client_secret=os.getenv("TWITTER_API_SECRET"),
@@ -116,7 +116,7 @@ def make_tweet(word: Word) -> int:
     definition_html = get_diec_definition_html(word)
     media_id = upload_string_to_image(definition_html)
 
-    auth = get_tweeter_auth()
+    auth = get_twitter_auth()
     response = requests.post(
         TWITTER_URL,
         auth=auth,
@@ -147,7 +147,7 @@ def upload_string_to_image(string: str) -> int:
         string, False, config=config, options={"width": "500"}
     )
 
-    auth = get_tweeter_auth()
+    auth = get_twitter_auth()
     response = requests.post(
         "https://upload.twitter.com/1.1/media/upload.json",
         auth=auth,
@@ -157,7 +157,7 @@ def upload_string_to_image(string: str) -> int:
 
 
 def search_last_paraulogic_tweets() -> List[dict]:
-    auth = get_tweeter_auth()
+    auth = get_twitter_auth()
     twenty_minutes_ago = datetime.now() - timedelta(minutes=20)
     response = requests.get(
         "https://api.twitter.com/2/tweets/search/recent",
@@ -173,7 +173,7 @@ def search_last_paraulogic_tweets() -> List[dict]:
 def reply_to_paraulogic_tweets(tweet_list: List[dict], created_id: int) -> None:
     emoji_replies = "😅😇🙃🥰😘😛😝😜🤪😎🤩😏🥺🤯😳😱😨😰😥🤗🤔🤭🤫😶😬🙄😯😵🤐🥴😈👻🤖🙀👋🖖🤟🤘🤙👆✊🙌💪"
     random_emojis = "".join(random.sample(emoji_replies, len(emoji_replies)))
-    auth = get_tweeter_auth()
+    auth = get_twitter_auth()
     for i, tweet in enumerate(tweet_list):
         response = requests.post(
             TWITTER_URL,
@@ -191,7 +191,7 @@ def tweet_solution_image(words: List[str]) -> int:
     media_id = upload_string_to_image(", ".join(words).upper())
     text = "Totes les paraules d'avui!"
 
-    auth = get_tweeter_auth()
+    auth = get_twitter_auth()
     response = requests.post(
         TWITTER_URL,
         auth=auth,
