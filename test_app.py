@@ -6,10 +6,11 @@ from app import (
     get_position_by_datetime,
     download_solutions,
     get_diec_definition_html,
+    get_amount_of_tutis,
 )
 
 
-def get_example_json():
+def get_example_json() -> dict:
     return json.load(open("example_response.json"))
 
 
@@ -26,6 +27,11 @@ def test_build_word():
     assert Word.build(
         "desgavell", "desgavell", {"d", "e", "g", "a", "v", "l", "s"}
     ) == Word("desgavell", "desgavell", 19, True)
+
+
+def test_get_amount_of_tutis():
+    list_of_words = get_example_json()
+    assert get_amount_of_tutis(list_of_words) == 1
 
 
 def test_get_nth_big_word():

@@ -61,6 +61,12 @@ def tweet_all_solutions():
     tweet_solution_image(solutions)
 
 
+@app.route("/tutis")
+def tweet_tutis():
+    solution = download_solutions()
+    tweet_amount_of_tutis(solution)
+
+
 @app.schedule(Cron("*/20", "8-21", "*", "*", "?", "*"))
 def scheduled_tweet(event):
     tweet()
@@ -69,6 +75,11 @@ def scheduled_tweet(event):
 @app.schedule(Cron("0", "22", "*", "*", "?", "*"))
 def scheduled_solutions(event):
     tweet_all_solutions()
+
+
+@app.schedule(Cron("30", "7", "*", "*", "?", "*"))
+def scheduled_tutis():
+    tweet_tutis()
 
 
 def get_current_word() -> Word:
@@ -97,6 +108,13 @@ def get_position_by_datetime() -> int:
 def get_nth_big_word(words: List[str], position: int) -> str:
     big_words = [word for word in words if len(word) >= BIG_WORD_MIN_LENGTH]
     return big_words[position]
+
+
+def get_amount_of_tutis(raw_solutions: dict) -> int:
+    today_words = map(lambda word: Word.build(
+        word, raw_solutions["paraules"][word], set(raw_solutions["lletres"])
+    ), raw_solutions["paraules"])
+    return len([w for w in today_words if w.is_tuti])
 
 
 def get_twitter_auth() -> OAuth1:
@@ -198,6 +216,19 @@ def tweet_solution_image(words: List[str]) -> int:
         json={"text": text, "media": {"media_ids": [str(media_id)]}},
     )
     return response.json()["data"]["id"]
+
+
+def tweet_amount_of_tutis(raw_solutions: dict) -> None:
+    amount_of_tutis = get_amount_of_tutis(raw_solutions)
+    sentence = ('només hi trobareu un tuti', f'hi podreu trobar {amount_of_tutis} tutis')[amount_of_tutis > 1]
+
+    auth = get_twitter_auth()
+    response = requests.post(
+        TWITTER_URL,
+        auth=auth,
+        json={"text": f'Bon dia! 👋\n\nAl Paraulògic d\'avui {sentence}. Bona sort!'},
+    )
+    print(response.text)
 
 
 if __name__ == "__main__":
