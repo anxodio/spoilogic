@@ -8,6 +8,8 @@ from app import (
     get_diec_definition_html,
     build_words_from_raw_response,
     get_number_of_tutis,
+    WORDS_KEY,
+    LETERS_KEY,
 )
 
 
@@ -32,7 +34,7 @@ def test_build_word():
 
 def test_get_nth_big_word():
     raw_response = get_example_json()
-    assert get_nth_big_word(raw_response["paraules"].keys(), 3) == "deessa"
+    assert get_nth_big_word(raw_response[WORDS_KEY].keys(), 3) == "deessa"
 
 
 @freeze_time("2021-12-21T08:01:22")
@@ -52,8 +54,8 @@ def test_get_position_by_datetime_8():
 
 def test_download_solutions():
     raw_response = download_solutions()
-    assert "lletres" in raw_response
-    assert "paraules" in raw_response
+    assert LETERS_KEY in raw_response
+    assert WORDS_KEY in raw_response
 
 
 def test_get_diec_definition_html():

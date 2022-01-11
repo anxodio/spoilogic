@@ -1,4 +1,6 @@
 import os
+import re
+import json
 import random
 from datetime import datetime, timedelta
 from dataclasses import dataclass
@@ -11,10 +13,13 @@ from requests_oauthlib import OAuth1
 import imgkit
 
 
-SOLUTION_URL = "https://vilaweb.cat/paraulogic/?solucions="
+PARAULOGIC_URL = "https://vilaweb.cat/paraulogic/"
 DIEC_URL = "https://vilaweb.cat/paraulogic/?diec="
 TWITTER_URL = "https://api.twitter.com/2/tweets"
 DIEC_COPYRIGHT = "<br /><br /><span>© Institut d'Estudis Catalans</span>"
+SOLUTIONS_JSON_REGEX = r"var t=([^;]*);"
+LETERS_KEY = "l"
+WORDS_KEY = "p"
 BIG_WORD_MIN_LENGTH = 6
 START_HOUR = 8
 
@@ -57,7 +62,7 @@ def tweet():
 
 @app.route("/solutions")
 def tweet_all_solutions():
-    solutions = download_solutions()["paraules"].keys()
+    solutions = download_solutions()[WORDS_KEY].keys()
     tweet_solution_image(solutions)
 
 
@@ -79,24 +84,23 @@ def scheduled_morning_statistics(event):
 def get_current_word() -> Word:
     raw_solutions = download_solutions()
     actual_position = get_position_by_datetime()
-    raw_word = get_nth_big_word(raw_solutions["paraules"].keys(), actual_position)
+    raw_word = get_nth_big_word(raw_solutions[WORDS_KEY].keys(), actual_position)
     return Word.build(
-        raw_word, raw_solutions["paraules"][raw_word], set(raw_solutions["lletres"])
+        raw_word, raw_solutions[WORDS_KEY][raw_word], set(raw_solutions[LETERS_KEY])
     )
 
 
 def download_solutions() -> dict:
-    return requests.get(
-        SOLUTION_URL + "{:%Y-%m-%d}".format(datetime.now()),
-        headers={"User-Agent": "Mozilla/5.0"},
-    ).json()
+    html = requests.get(PARAULOGIC_URL).text
+    raw_json = re.search(SOLUTIONS_JSON_REGEX, html).group(1)
+    return json.loads(raw_json)
 
 
 def build_words_from_raw_response(raw_response: dict) -> List[Word]:
-    today_letters = set(raw_response["lletres"])
+    today_letters = set(raw_response[LETERS_KEY])
     return [
         Word.build(key, words, today_letters)
-        for key, words in raw_response["paraules"].items()
+        for key, words in raw_response[WORDS_KEY].items()
     ]
 
 
@@ -242,5 +246,4 @@ if __name__ == "__main__":
     # tweet()
     # tweet_all_solutions()
     # print(search_last_paraulogic_tweets())
-    # print(get_current_word().word)
-    print(tweet_morning_statistics())
+    print(get_current_word().word)

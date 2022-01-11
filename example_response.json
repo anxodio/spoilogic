@@ -1,6 +1,6 @@
 {
-  "lletres": ["d", "e", "g", "a", "v", "l", "s"],
-  "paraules": {
+  "l": ["d", "e", "g", "a", "v", "l", "s"],
+  "p": {
     "ades": "adés",
     "allassa": "allassa",
     "ase": "ase",
