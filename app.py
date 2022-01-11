@@ -16,7 +16,7 @@ DIEC_URL = "https://vilaweb.cat/paraulogic/?diec="
 TWITTER_URL = "https://api.twitter.com/2/tweets"
 DIEC_COPYRIGHT = "<br /><br /><span>© Institut d'Estudis Catalans</span>"
 BIG_WORD_MIN_LENGTH = 6
-START_HOUR = 9
+START_HOUR = 8
 
 
 load_dotenv()
@@ -221,7 +221,7 @@ def tweet_morning_statistics() -> int:
     raw_solutions = download_solutions()
     words = build_words_from_raw_response(raw_solutions)
     total_tutis = get_number_of_tutis(words)
-    tutis_text = "només un tuti" if len(total_tutis) == 1 else f"{total_tutis} tutis"
+    tutis_text = "només un tuti" if total_tutis == 1 else f"{total_tutis} tutis"
 
     text = (
         "Bon dia 👋\n\n"
@@ -242,4 +242,5 @@ if __name__ == "__main__":
     # tweet()
     # tweet_all_solutions()
     # print(search_last_paraulogic_tweets())
-    print(get_current_word().word)
+    # print(get_current_word().word)
+    print(tweet_morning_statistics())
