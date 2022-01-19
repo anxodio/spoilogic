@@ -230,7 +230,7 @@ def tweet_morning_statistics() -> int:
     text = (
         "Bon dia 👋\n\n"
         f"Avui hi ha un total de {len(words)} paraules per trobar i {tutis_text}, molta sort!\n\n"
-        "D'aquí mitja horeta comencem amb els spoilers 😉"
+        "D'aquí mitja horeta comencem a publicar els spoilers 😉"
     )
 
     auth = get_twitter_auth()
